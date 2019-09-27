@@ -25,11 +25,15 @@
 queue_t *q_new()
 {
     queue_t *q = malloc(sizeof(queue_t));
+
     /* What if malloc returned NULL? */
     if (!q)
         return NULL;
-    q->size = 0;
+
     q->head = NULL;
+    q->tail = NULL;
+    q->size = 0;
+
     return q;
 }
 
@@ -64,8 +68,7 @@ bool q_insert_head(queue_t *q, char *s)
 
     /* Don't forget to allocate space for the string and copy it */
     /* What if either call to malloc returns NULL? */
-    list_ele_t *newh;
-    newh = malloc(sizeof(list_ele_t));
+    list_ele_t *newh = malloc(sizeof(list_ele_t));
     if (!newh)
         return false;
 
@@ -74,6 +77,9 @@ bool q_insert_head(queue_t *q, char *s)
 
     q->head = newh;
     q->size++;
+    if (!q->tail)
+        q->tail = q->head;
+
     return true;
 }
 
@@ -100,8 +106,10 @@ bool q_insert_tail(queue_t *q, char *s)
     newh->next = NULL;
 
     q->tail->next = newh;
+    q->tail = newh;
+    q->size++;
 
-    return ture;
+    return true;
 }
 
 /*
@@ -115,7 +123,19 @@ bool q_insert_tail(queue_t *q, char *s)
 bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
 {
     /* You need to fix up this code. */
+    if (!q || !q->head)
+        return false;
+
+    list_ele_t *node = q->head;
     q->head = q->head->next;
+    q->size--;
+
+    strncpy(sp, node->value, bufsize - 1);
+    sp[bufsize - 1] = '\0';
+
+    free(node->value);
+    free(node);
+
     return true;
 }
 
