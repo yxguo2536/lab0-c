@@ -26,7 +26,6 @@ queue_t *q_new()
 {
     queue_t *q = malloc(sizeof(queue_t));
 
-    /* What if malloc returned NULL? */
     if (!q)
         return NULL;
 
@@ -44,6 +43,7 @@ void q_free(queue_t *q)
     /* Free queue structure */
     if (!q)
         return;
+
     while (q->head) {
         list_ele_t *node = q->head;
         q->head = q->head->next;
@@ -82,10 +82,10 @@ bool q_insert_head(queue_t *q, char *s)
     newh->value = newStr;
     newh->next = q->head;
 
+    if (!q->size)
+        q->tail = newh;
     q->head = newh;
     q->size++;
-    if (!q->tail)
-        q->tail = q->head;
 
     return true;
 }
@@ -119,8 +119,13 @@ bool q_insert_tail(queue_t *q, char *s)
     newh->value = newStr;
     newh->next = NULL;
 
-    q->tail->next = newh;
-    q->tail = newh;
+    if (!q->size) {
+        q->head = newh;
+        q->tail = newh;
+    } else {
+        q->tail->next = newh;
+        q->tail = q->tail->next;
+    }
     q->size++;
 
     return true;
