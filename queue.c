@@ -67,12 +67,19 @@ bool q_insert_head(queue_t *q, char *s)
         return false;
 
     /* Don't forget to allocate space for the string and copy it */
+    char *newStr = malloc(strlen(s) + 1);
+    if (!newStr)
+        return false;
+    strcpy(newStr, s);
+
     /* What if either call to malloc returns NULL? */
     list_ele_t *newh = malloc(sizeof(list_ele_t));
-    if (!newh)
+    if (!newh) {
+        free(newStr);
         return false;
+    }
 
-    newh->value = strdup(s);
+    newh->value = newStr;
     newh->next = q->head;
 
     q->head = newh;
@@ -98,11 +105,18 @@ bool q_insert_tail(queue_t *q, char *s)
     if (!q)
         return false;
 
-    list_ele_t *newh = malloc(sizeof(list_ele_t));
-    if (!newh)
+    char *newStr = malloc(strlen(s) + 1);
+    if (!newStr)
         return false;
+    strcpy(newStr, s);
 
-    newh->value = strdup(s);
+    list_ele_t *newh = malloc(sizeof(list_ele_t));
+    if (!newh) {
+        free(newStr);
+        return false;
+    }
+
+    newh->value = newStr;
     newh->next = NULL;
 
     q->tail->next = newh;
@@ -130,12 +144,13 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
     q->head = q->head->next;
     q->size--;
 
-    strncpy(sp, node->value, bufsize - 1);
-    sp[bufsize - 1] = '\0';
+    if (sp) {
+        strncpy(sp, node->value, bufsize - 1);
+        sp[bufsize - 1] = '\0';
+    }
 
     free(node->value);
     free(node);
-
     return true;
 }
 
@@ -175,6 +190,7 @@ void q_reverse(queue_t *q)
         cur = cur->next;
 
         q->head->next = prev;
+
         prev = q->head;
     }
 }
